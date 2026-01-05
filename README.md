@@ -576,50 +576,274 @@ This analysis provides a comprehensive explanation of the catch-up lecture (5a) 
 
 ---
 
-### **Section 2: The General Recipe for Loss Functions (Slides 6–13)**
+### **Section 2: The General Recipe for Loss Functions **
 
-*   **Titles:** "Recipe for loss functions."
-*   **Concepts from Reference Book:** This follows **UDL Section 5.2 (p. 74)**, which provides a four-step framework for building loss functions based on Maximum Likelihood.
-    *   **Step 1 (Slides 8–9):** Choose a distribution $Pr(y|\theta)$. This slide includes **Table 5.10 (p. 84)**, which is a crucial reference for matching data types (e.g., continuous, discrete, circular) to appropriate distributions.
-    *   **Example: Poisson Distribution (Slides 7, 10):** The lecture introduces count data (e.g., "Number of moose"). For non-negative integers $y \in \{0, 1, 2, ...\}$, the Poisson distribution is used (**UDL Problem 5.6, p. 90**). 
-    *   **Step 2 (Slides 11–13):** Predict distribution parameters. A challenge in neural networks is that the raw output can be any real number, but parameters like $\lambda$ (for Poisson) must be positive. The "Solution" shown on Slide 12 is to pass the network output $f[x, \phi]$ through an **exponential function** to ensure positivity, resulting in the formula on Slide 13.
+This analysis covers **Slides 6 through 9** of the catch-up lecture (5a), which focuses on the transition from simple line-fitting to a probabilistic framework for training neural networks. This material is primarily based on **Chapter 5** of the reference book, *"Understanding Deep Learning"*.
 
 ---
 
-### **Section 3: Visualizing Distributions (Slides 14–16)**
+### **Slide 6: The Recipe for Loss Functions**
+This slide introduces the fundamental 4-step framework used to derive almost every loss function in deep learning. This is the "Maximum Likelihood" approach detailed in **Section 5.2 (p. 74)**.
 
-*   **Visuals:** These slides demonstrate **Section 5.1.1 (p. 72)**. 
-    *   For a specific "Time of Day" ($x$), the model predicts a specific distribution parameter ($\lambda$).
-    *   The vertical orange line is a "slice" through the input space. At that $x$, the model generates a vertical histogram representing the Poisson distribution over possible counts $y$. This mirrors the logic of **Figure 5.1 (p. 71)**.
-
----
-
-### **Section 4: Training and Optimization (Slides 17–21)**
-
-*   **Formulas & Concepts:**
-    *   **Step 3 (Slide 17):** Training involves finding parameters $\hat{\phi}$ that minimize the **Negative Log-Likelihood (NLL)**. This is defined in **UDL Section 5.1.4 (p. 74)**.
-    *   **Derivation (Slides 18–20):** These slides walk through the math of taking the log of the Poisson PMF and negating it. The final result (Slide 20) is the specific loss function the network will minimize via gradient descent.
-    *   **Step 4: Inference (Slide 21):** Once the model is trained, inference is performing a prediction. For a new $x$, we either return the full distribution or the "maximum of this distribution" (the mode), as described in **UDL Section 5.1.5 (p. 74)**.
+1.  **Step 1: Choose a distribution $Pr(y|\theta)$.** Instead of assuming the model just outputs a number, we assume the model predicts the *parameters* ($\theta$) of a probability distribution that describes the data. 
+2.  **Step 2: Predict $\theta$ with the model.** We set our neural network $f[x, \phi]$ to output these parameters. Note the notation: $\phi$ are the internal weights of the network, while $\theta$ are the parameters of the chosen distribution (like the mean $\mu$ or variance $\sigma^2$).
+3.  **Step 3: Training (Minimize Negative Log-Likelihood).** We seek the weights $\hat{\phi}$ that maximize the probability of seeing our training data. Mathematically, it is easier to minimize the negative sum of the logs. 
+    *   **Formula (5.7):** $\hat{\phi} = \text{argmin}_\phi [-\sum \log[Pr(y_i|f[x_i, \phi])]]$.
+    *   **Concept:** This converts a product of many small probabilities (which would cause a computer to crash due to numerical underflow) into a sum of terms (**UDL Section 5.1.3, p. 73**).
+4.  **Step 4: Inference.** Once trained, for a new $x$, we return the most likely value (the "mode" or peak of the distribution).
 
 ---
 
-### **Section 5: Circular Data & Von Mises (Slides 22–30)**
+### **Slide 7: Visualization – The Moose Dataset**
+This slide presents a scatter plot of "Number of moose, $y$" vs. "Time of day, $x$."
 
-*   **Concepts from Reference Book:**
-    *   **Slide 23:** Introduces **circular data** (Wind direction). Note the $y$-axis wraps around from $\pi$ to $-\pi$. Standard Gaussian distributions are unsuitable here because they don't account for this periodicity.
-    *   **Slides 25–26:** Following **UDL Figure 5.13 (p. 88)**, the lecture introduces the **Von Mises distribution**. 
-    *   **Step 2 (Slide 27):** The parameters are mean direction $\mu$ and concentration $\kappa$.
-    *   **Slide 28:** Visualizes the probability density wrapped on a 1D axis.
+*   **Observation:** The data points ($y$) are integers ($0, 1, 2...$) and are never negative. 
+*   **Significance:** This is **count data**. 
+*   **The "Why":** Standard linear regression (Chapter 2) assumes the data follows a Normal distribution. However, a Normal distribution allows for continuous values (like 4.5 moose) and negative values, neither of which make sense here. This visual motivates the need for Step 1 of the "Recipe"—choosing a distribution that actually fits the nature of the data.
 
 ---
 
-### **Section 6: Review of Gradient Descent (Slides 31–51)**
+### **Slide 8: Zooming on Step 1**
+This slide emphasizes the importance of the **domain** of predictions.
 
-*   **Concepts from Reference Book:** This section recaps the "Fitting" process from **Chapter 6 (p. 91)**.
-    *   **Model vs. Parameters (Slide 31–32):** Distinguishes between the variables ($x, y$) and parameters ($\phi$), following the notation in **Appendix A (p. 451)**.
-    *   **Visualizing Training (Slides 41–45):** These slides use **Figure 6.1 (p. 93)**. They show the "Loss Surface" (a 3D bowl) and the "Heatmap" (2D contours). 
-    *   **Gradient Descent Algorithm:** The dots numbered 0–4 represent iterations. At each step, the algorithm calculates the gradient and moves "downhill" to find the global minimum where the loss is lowest. 
-    *   **Derivatives as Slopes (Slides 46–51):** This uses a simple parabola $y = x^2 - 4x + 5$ to explain that the derivative ($\partial y / \partial x = 2x - 4$) provides the slope. The blue arrows show that if the slope is positive, we move left; if negative, we move right. This is the core intuition for the update rule in **Equation 6.3 (p. 92)**: $\phi \leftarrow \phi - \alpha \frac{\partial L}{\partial \phi}$.
+*   **Concept:** The "domain" is the set of all possible values $y$ can take. 
+*   **Application:** If your data is binary (Yes/No), your domain is $\{0, 1\}$. If it is a count, it is $\{0, 1, 2, \dots\}$. 
+*   **Reference Book Link:** In **Section 5.1.1 (p. 72)**, Prince explains that the choice of distribution is the designer's primary way of encoding "prior knowledge" about the task into the model.
+
+---
+
+### **Slide 9: Table 5.10 – Matching Distributions to Tasks**
+This table is arguably the most important study tool in Chapter 5 (**UDL p. 84, Figure 5.11**). It provides a lookup guide for which distribution to use for specific machine learning tasks.
+
+*   **Regression (Univariate, continuous, unbounded):** Use the **Univariate Normal** distribution. This is why "Least Squares" works—it is the direct mathematical result of using a Normal distribution in the recipe (proven in **UDL Section 5.3, p. 75**).
+*   **Binary Classification (Discrete, binary):** Use the **Bernoulli** distribution. This leads to the **Binary Cross-Entropy** loss.
+*   **Multiclass Classification (Discrete, bounded):** Use the **Categorical** distribution. This leads to the **Multiclass Cross-Entropy** loss.
+*   **The Moose Example (Discrete, bounded below):** According to the table, we should use the **Poisson distribution**.
+*   **Wind Direction (Univariate, continuous, circular):** Use the **Von Mises** distribution. 
+
+**Exam/Student Tip:** You must be able to look at a dataset (like the moose plot or wind direction plot) and identify the correct distribution from this table. For example, if $y$ is always a positive magnitude (like house price), the table suggests the **Exponential** or **Gamma** distribution.
+
+---
+
+### **Summary for Preparation**
+The transition from Slide 6 to 9 represents the core "Engine" of modern deep learning. We no longer just "draw a line"; we **choose a probability model** that matches our data type (Slide 9), use the network to **predict its shape** (Slide 6), and **maximize the overlap** between that shape and our actual data points (Slide 7) using the Negative Log-Likelihood.
+
+---
+
+### **Section 3: Poisson distribution**
+
+This detailed analysis covers **Slides 10 through 21** of the catch-up lecture (5a), focusing on **Poisson Regression** and the mathematical derivation of loss functions.
+
+This section is essential for your exam because it demonstrates how to move beyond simple linear regression to handle specialized data types (like counts).
+
+---
+
+### **1. The Poisson Distribution (Slide 10)**
+**Title:** Poisson Distribution
+**Concept:** When your output $y$ is "count data" (discrete, non-negative integers like $0, 1, 2, \dots$), you cannot use a Normal distribution. Instead, you use the **Poisson distribution**.
+*   **Formula:** $Pr(y = k) = \frac{\lambda^k e^{-\lambda}}{k!}$
+*   **Notation:** $\lambda$ (lambda) is the only parameter of this distribution. It represents both the **mean** and the **variance**. 
+*   **Constraint:** Crucially, $\lambda$ must be greater than zero ($\lambda > 0$).
+*   **Visuals:** Panels (a, b, c) show that as $\lambda$ increases, the peak of the distribution moves to the right and becomes more "spread out" (since variance = $\lambda$).
+
+---
+
+### **2. The Positivity Problem & Exponential Mapping (Slides 11–13)**
+**Title:** Step 2 of the Recipe
+**The Problem:** A standard neural network $f[\mathbf{x}, \phi]$ can output any real number (negative or positive). however, the Poisson parameter $\lambda$ **must** be positive.
+**The Solution:** We pass the network output through a function that maps "anything" to "positive." The standard choice is the **exponential function** ($e^z$).
+*   **Book Reference:** This is a specific application of the "Recipe for constructing loss functions" in **Section 5.2 (p. 74)**.
+*   **Mapping:** $\lambda = \exp[f[\mathbf{x}, \phi]]$.
+*   **Slide 13 Formula:** Substituting this into the Poisson PMF, we get:
+    $$Pr(y = k) = \frac{\exp[f[\mathbf{x}, \phi]]^k \exp(-\exp[f[\mathbf{x}, \phi]])}{k!}$$
+    *This looks intimidating, but it is just the Poisson formula where $\lambda$ has been replaced by the network's exponentiated output.*
+
+---
+
+### **3. Visualizing Conditional Probability (Slides 14–16)**
+**Concept:** These slides visualize what the model is actually doing.
+*   **The Process:** For a given "Time of Day" ($x$), the vertical orange line represents a specific input. At this point, the model calculates one $\lambda$. 
+*   **The Plot:** On the bottom axis, you see a vertical histogram. This is the **conditional distribution** $Pr(y|x)$. 
+*   **UDL Connection:** This mirrors **Figure 5.1 (p. 71)**. It shows that for every different $x$, the model generates a *different* probability distribution over $y$. Training is the process of making these distributions peak over the actual observed data points (the green dots).
+
+---
+
+### **4. Training: Minimizing Negative Log-Likelihood (Slides 17–20)**
+**Title:** Step 3: To train the model...
+**Concept:** We use the **Maximum Likelihood Criterion**. We want to find parameters $\phi$ that make the training data $\{x_i, y_i\}$ as probable as possible.
+*   **The Math (Slide 17):** Minimizing the **Negative Log-Likelihood (NLL)** is mathematically identical to maximizing the likelihood but much easier for computers.
+    *   **Formula (5.7):** $\hat{\phi} = \text{argmin}_\phi [-\sum \log Pr(y_i|f[x_i, \phi])]$.
+*   **The Derivation (Slides 18–20):**
+    1.  Start with the Poisson probability (Slide 18).
+    2.  Take the $\log$ of the product of probabilities (which becomes a sum of logs, Slide 19).
+    3.  **Final Loss Function (Slide 20):** 
+        $$L[\phi] = -\sum (y_i f[x_i, \phi] - \exp[f[x_i, \phi]] - \log[y_i!])$$
+*   **Exam Tip:** In optimization, we ignore terms that don't contain $\phi$ because they don't affect the gradient. Therefore, $\log[y_i!]$ is usually dropped during actual implementation.
+
+---
+
+### **5. Inference (Slide 21)**
+**Title:** Step 4: To perform inference...
+**Concept:** Once the model is trained, how do we use it?
+*   **Option A:** Return the **full distribution**. This is useful if you want to know the uncertainty (e.g., "There is a 20% chance of seeing 5 moose and a 10% chance of seeing 10").
+*   **Option B:** Return the **maximum of the distribution** (the "mode"). This is your "best guess" point estimate.
+*   **Visual:** Shows the Poisson distribution for different $\lambda$ values. For inference, you would typically pick the value of $k$ where the bar is highest.
+
+---
+
+### **Summary Table for Exam Preparation**
+
+| Aspect | Linear Regression (Ch. 2) | Poisson Regression (Slides 10-21) |
+| :--- | :--- | :--- |
+| **Data Type** | Continuous, Unbounded | Discrete Counts ($0, 1, 2...$) |
+| **Distribution** | Normal (Gaussian) | Poisson |
+| **Constraint** | None | $\lambda$ must be $> 0$ |
+| **Activation** | Identity (None) | Exponential ($\exp$) |
+| **Loss Function** | Least Squares | Poisson NLL |
+
+**Final Exam Advice:** Be prepared to derive the NLL for a given distribution. The steps are always: 
+1. Write the probability formula. 
+2. Take the log. 
+3. Multiply by $-1$. 
+4. Remove constants that don't involve the model parameters $\phi$.
+
+---
+
+### **Section 4: Von Mises distribution**
+
+This section of the catch-up lecture focuses on **circular regression**, specifically using the **Von Mises distribution**. In a course or exam setting, this is used to demonstrate how the "Maximum Likelihood Recipe" can be applied to data that "wraps around," such as angles, time of day, or compass directions.
+
+---
+
+### **Slide 26: The Von Mises Distribution**
+**Title:** Von Mises distribution
+**The Concept:** Circular data (like wind direction $y \in [-\pi, \pi]$) cannot be modeled with a standard Normal distribution because the math doesn't account for the fact that $-\pi$ and $\pi$ are the same point. The Von Mises distribution is essentially the "Gaussian of the circle."
+
+*   **The Formula:** $Pr(y|\mu, \kappa) = \frac{\exp[\kappa \cos(y - \mu)]}{2\pi \cdot \text{Bessel}_0[\kappa]}$
+*   **Parameters:**
+    *   **$\mu$ (Mean direction):** The angle where the distribution peaks (the "center").
+    *   **$\kappa$ (Concentration):** This acts like the inverse of variance. If $\kappa$ is large, the distribution is very thin and peaked. If $\kappa$ is small, the distribution spreads out around the circle. 
+*   **The Normalization:** $I_0(\kappa)$ (the modified Bessel function) is a constant that ensures the total area under the curve equals 1.
+*   **Book Reference:** This is discussed in **UDL Section 5.5.1 (p. 83-84)** and visualized in **Figure 5.13 (p. 88)**.
+
+---
+
+### **Slide 27: Step 2 of the Recipe**
+**Title:** Step 2: Set the machine learning model to predict parameters...
+**Concept:** According to the "Recipe" (Section 5.2), once you pick a distribution, your neural network $f[x, \phi]$ must predict its parameters.
+*   **Application:** In this case, the network takes a real-world input (like Longitude $x$) and outputs the predicted mean direction $\mu$. 
+*   **Constraint Handling:** While not explicitly on the slide, the book mentions that because $\kappa$ must be positive, if the network were to predict $\kappa$, its output would need to be passed through an **exponential** or **Softplus** function (**UDL Section 5.2, Step 2**).
+
+---
+
+### **Slide 28: Visualizing Circular Data**
+**Visuals:**
+*   **Top Plot:** A scatter plot of wind directions. Notice how the data points appear at both the very top ($\pi$) and very bottom ($-\pi$). In a linear model, these would be considered "far apart," but in circular data, they are actually adjacent. 
+*   **Bottom Plot:** This shows the probability density function (PDF). The vertical line indicates that for a specific Longitude $x$, the model predicts a specific distribution of possible wind directions $y$.
+*   **Concept:** This slide illustrates **Conditional Probability** ($Pr(y|x)$). The shape of the distribution changes as you move along the $x$-axis.
+
+---
+
+### **Slide 29: Step 3 – Training (The Loss Function)**
+**Title:** Step 3: To train the model...
+**Concept:** To find the best network weights $\phi$, we must minimize the **Negative Log-Likelihood (NLL)**.
+*   **Equation (5.7):** $\hat{\phi} = \text{argmax}_\phi \sum_{i=1}^I \log[Pr(y_i|f[x_i, \phi])]$.
+*   **Derivation for Exam:** If you take the log of the Von Mises formula and negate it, you get:
+    $$L[\phi] = -\sum_{i=1}^I \kappa \cos(y_i - \mu_i) + \text{constant terms}$$
+*   **Intuition:** To minimize this loss, the model tries to make $\cos(y_i - \mu_i)$ as large as possible. Since the maximum of a cosine is at 1 (when the angle is 0), the model is essentially trying to make its prediction $\mu_i$ equal to the true direction $y_i$.
+
+---
+
+### **Slide 30: Step 4 – Inference**
+**Title:** Step 4: To perform inference...
+**Concept:** Once the model is trained, how do we make a "point estimate" prediction for a new input $x$?
+*   **The Logic:** We look for the **mode** (the most likely value). 
+*   **Von Mises Inference:** For this distribution, the peak is always at $\mu$. Therefore, the network's output $f[x, \hat{\phi}]$ is the prediction.
+*   **Book Reference:** This follows **UDL Section 5.1.5 (p. 74)**, where inference is defined as $\hat{y} = \text{argmax}_y Pr(y|f[x, \hat{\phi}])$.
+
+---
+
+### **Why this matters for your Exam:**
+1.  **Data-to-Distribution Matching:** You might be asked: "Which distribution is appropriate for predicting the hour of the day a crime occurs?" Answer: Von Mises, because time is circular.
+2.  **Loss Function Derivation:** You should be able to show that maximizing the Von Mises likelihood is equivalent to maximizing the cosine similarity between the predicted and actual angles.
+3.  **The Recipe:** Remember the 4-step sequence (Choose distribution -> Predict parameters -> Minimize NLL -> Inference). It is the backbone of Chapter 5.
+
+---
+
+This final section of the **Catchup File (Pages 31–51)** moves away from choosing probability distributions and focuses on the **Optimization** process—how we actually find the best parameters for a model. This corresponds to **Chapter 6** of the reference book, *"Understanding Deep Learning."*
+
+---
+
+### **1. Parameters vs. Variables (Slides 31–32)**
+**Concepts:**
+*   **Notation:** The slides reinforce the distinction between **Variables** ($x, y$) and **Parameters** ($\phi$). 
+    *   Variables are your data points (the age of the car, the price). 
+    *   Parameters are the "dials" you turn to change how the model behaves.
+*   **Book Connection:** As stated in **Appendix A (p. 451)**, we use Roman letters for variables and Greek letters for parameters. 
+*   **The Model:** $y = f[x, \phi]$. The loss function $L[\phi]$ is a function of the *parameters*, not the data. We treat the data as fixed constants during training.
+
+---
+
+### **2. Least Squares Regression Recap (Slides 33–40)**
+**Concepts:**
+*   **The Visual (Slide 33):** The orange dots are training data. The cyan line is the model's current guess. The vertical dashed lines are the **residuals** (errors).
+*   **Formula (Slide 32):** $L[\phi] = \sum (f[x_i, \phi] - y_i)^2$. 
+*   **Book Connection:** This is the **Least Squares loss** detailed in **Section 2.2.2 (p. 33)**.
+*   **The Loss Surface (Slides 35–40):** 
+    *   Panel (a) shows the **Loss Landscape**. Each contour line represents a level of "badness." The center (darkest part) is the **Global Minimum**.
+    *   The dots numbered **0, 1, 2, 3, 4** show the progression of the learning algorithm. As the dot moves to the center of the "bowl" on the left, the line on the right rotates and shifts to fit the data points better.
+
+---
+
+### **3. The Geometry of Convexity (Slides 41–43)**
+**Concepts:**
+*   **Convex vs. Non-Convex:** 
+    *   **Convex (Slide 41b):** A smooth bowl with only one bottom. Gradient descent is guaranteed to find the best solution.
+    *   **Non-Convex (Slide 41a, c):** Multiple "valleys" (local minima). The algorithm might get stuck in a sub-optimal spot (Points 1 or 3).
+*   **Mathematical Test (Slide 42–43):**
+    *   In 1D: A function is convex if the **second derivative** is positive everywhere.
+    *   In higher dimensions: It is convex if the **Hessian matrix** ($H[\phi]$) is **positive definite** (all eigenvalues are positive).
+*   **Book Connection:** Explained in the **Notes for Chapter 6 (p. 106)**. Most deep learning models are non-convex, which is why initialization matters.
+
+---
+
+### **4. Intuition for Gradient Descent (Slides 45–51)**
+**Title:** This technique is known as gradient descent.
+**The Logic (Slide 46):** 
+*   Consider a simple parabola: $y = x^2 - 4x + 5$.
+*   The derivative is $\frac{\partial y}{\partial x} = 2x - 4$.
+*   **The "Slope" Rule:** 
+    *   At $x=4$ (Slide 49), the slope is $+4$. To get to the bottom (the minimum), we must move in the **negative** direction (left).
+    *   At $x=1$ (Slide 50), the slope is $-2$. To get to the bottom, we must move in the **positive** direction (right).
+*   **The Update Rule:** $\phi \leftarrow \phi - \alpha \frac{\partial L}{\partial \phi}$.
+    *   The **minus sign** is crucial. It ensures that if the slope is positive, we subtract (move left), and if the slope is negative, we add (move right). 
+    *   $\alpha$ (alpha) is the **learning rate** or step size.
+
+**Book Connection:** This is the derivation of the update rule in **Section 6.1 (p. 92, Eq 6.3)**.
+
+---
+
+### **Summary Table for Course/Exam Prep**
+
+| Topic | Key Term | Mathematical Tool | Exam Importance |
+| :--- | :--- | :--- | :--- |
+| **Model** | Parameters ($\phi$) | $y = f[x, \phi]$ | Parameters are what we learn. |
+| **Loss** | Least Squares | $\sum (\text{pred} - \text{truth})^2$ | Used for Normal distributions. |
+| **Surface** | Convexity | Hessian Matrix | Determinant must be $> 0$. |
+| **Fitting** | Gradient Descent | $\phi - \alpha \frac{\partial L}{\partial \phi}$ | Why do we subtract? To move downhill. |
+
+### **Exam Advice:**
+1.  **Hessian:** Be ready to define convexity using the Hessian matrix for a multivariate function.
+2.  **Gradient Direction:** If a question asks why there is a minus sign in the SGD update rule, the answer is: "Because the gradient points in the direction of steepest *ascent*, so we must move in the *opposite* direction to reach the minimum."
+3.  **Local Minima:** Remember that for non-convex models (like deep networks), gradient descent only guarantees finding a **local** minimum, not the **global** minimum.
+
+---
+---
+---
+---
+---
+
+
 
 ---
 ---
