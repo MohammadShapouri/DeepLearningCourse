@@ -576,7 +576,7 @@ This analysis provides a comprehensive explanation of the catch-up lecture (5a) 
 
 ---
 
-### **Section 2: The General Recipe for Loss Functions **
+### **Section 2: The General Recipe for Loss Functions**
 
 This analysis covers **Slides 6 through 9** of the catch-up lecture (5a), which focuses on the transition from simple line-fitting to a probabilistic framework for training neural networks. This material is primarily based on **Chapter 5** of the reference book, *"Understanding Deep Learning"*.
 
@@ -770,86 +770,782 @@ This section of the catch-up lecture focuses on **circular regression**, specifi
 
 ---
 
-This final section of the **Catchup File (Pages 31–51)** moves away from choosing probability distributions and focuses on the **Optimization** process—how we actually find the best parameters for a model. This corresponds to **Chapter 6** of the reference book, *"Understanding Deep Learning."*
+This section of the catch-up lecture (Slides 31–39) provides the formal framework for **Supervised Learning** and presents a taxonomy of different machine learning tasks. This corresponds to the introductory material in **Chapter 1** and **Section 2.1** of the reference book.
 
 ---
 
-### **1. Parameters vs. Variables (Slides 31–32)**
+### **1. The Formal Model and Parameters (Slide 31)**
+**Title:** Model
+**Concept:** This slide establishes the mathematical notation used throughout the course.
+*   **Notation:** The model is written as $y = f[x, \phi]$.
+    *   **$x$:** The input data (e.g., house size).
+    *   **$y$:** The model's prediction (e.g., price).
+    *   **$\phi$ (phi):** These are the **Parameters**. 
+*   **Book Connection:** As explained in **Appendix A (p. 437)**, parameters are internal to the function and are always denoted by **Greek letters**. These are the "dials" that the training algorithm turns to change the model's behavior. The function $f[\cdot]$ defines a **family of equations**, and $\phi$ selects one member of that family (**Section 2.1, p. 31**).
+
+---
+
+### **2. The Training Set and Loss Function (Slide 32)**
+**Title:** Loss function
+**Concept:** How do we measure "goodness"?
+*   **The Dataset:** We use $I$ pairs of examples $\{x_i, y_i\}_{i=1}^I$. 
+*   **Loss Function $L[\phi]$:** A scalar value that summarizes how poorly the model predicts the training outputs.
+*   **The Goal:** We want $L[\phi]$ to be small. 
+*   **Book Connection:** **Section 2.2 (p. 32)** states that the loss function is a summary of the "mismatch" in the mapping. Minimizing this is the fundamental goal of machine learning.
+
+---
+
+### **3. Task 1: Univariate Regression (Slide 33)**
+**Title:** Regression
+**Concept:** Predicting a single, continuous real value.
+*   **Example:** Inputting house features (square feet, bedrooms) to predict a price ($340k).
+*   **Model Type:** Usually a **Fully Connected Network** (also called an MLP).
+*   **Book Connection:** This is the most basic task described in **Section 1.1.1 (p. 16, para 2)**. The output domain is the real line $y \in \mathbb{R}$.
+
+---
+
+### **4. Task 2: Binary Classification (Slide 34)**
+**Title:** Text classification
+**Concept:** Predicting which of **two** discrete classes an input belongs to.
+*   **Example:** Sentiment analysis. Input: "The soup tasted like socks." Output: [0.02, 0.98] (Probabilities for Positive/Negative).
+*   **Model Type:** This slide mentions a **Transformer network**, used for text.
+*   **Book Connection:** See **Section 1.1.1 (p. 16, para 4)**. The goal is to assign the input to one of two categories, often labeled 0 and 1.
+
+---
+
+### **5. Task 3: Multiclass Classification (Slide 35)**
+**Title:** Image classification
+**Concept:** Predicting which of $K > 2$ possible classes an input belongs to.
+*   **Example:** Identifying an object in a photo (Bicycle, Apple, Clown, etc.).
+*   **Model Type:** **Convolutional Neural Network (CNN)**, which is specialized for images.
+*   **Book Connection:** See **Section 1.1.1 (p. 16, para 4)** and **Figure 1.2e**. The model returns a vector of size $N$ containing the probabilities of each category.
+
+---
+
+### **6. Task 4: Multivariate Regression (Slide 36)**
+**Title:** Depth estimation
+**Concept:** Predicting **many** continuous outputs simultaneously.
+*   **Example:** Taking a 2D image and predicting the distance (depth) of every single pixel.
+*   **Model Type:** **Convolutional encoder-decoder** (often called an "hourglass" network).
+*   **Book Connection:** This is an example of **Structured Outputs** from **Section 1.1.5 (p. 19, para 5)** and **Figure 1.4b**.
+
+---
+
+### **7. Task 5: Image Segmentation (Slide 37)**
+**Title:** Image segmentation
+**Concept:** A **Multivariate Binary Classification** problem.
+*   **Example:** For every pixel in an image, predict a 1 if it is part of a "cow" and a 0 if it is "background."
+*   **Book Connection:** Described in **Section 1.1.5 (p. 19)** and **Figure 1.4a**. The output is high-dimensional and structured, where neighboring pixels are likely to have the same label.
+
+---
+
+### **8. Task 6: Entity Classification (Slide 38)**
+**Title:** Entity classification
+**Concept:** A **Multivariate Multiclass Classification** problem.
+*   **Example:** Input: "Katy works at Apple in Bath." The model must classify each word: Katy (Person), Apple (Organization), Bath (Location).
+*   **Model Type:** **Transformer network**.
+*   **Book Connection:** This falls under Natural Language Processing (NLP), discussed in **Chapter 12**. It is "multivariate" because you are making a separate multiclass decision for every word in the sequence.
+
+---
+
+### **9. Task 7: Sequence-to-Sequence / Translation (Slide 39)**
+**Title:** Translation
+**Concept:** Mapping one structured sequence to another.
+*   **Example:** Translating an English sentence into French.
+*   **Challenge:** The output has its own "grammar" or structure that the model must respect.
+*   **Book Connection:** This is discussed as one of the most challenging supervised tasks in **Section 1.1.5 (p. 19)** and **Section 12.8 (p. 226)**.
+
+---
+
+### **Exam and Course Relevance:**
+You are expected to be able to categorize a real-world problem into one of these types. 
+*   **If the output is a number:** It's Regression.
+*   **If the output is a label:** It's Classification.
+*   **If there is one output:** It's Univariate.
+*   **If there are many outputs (like a whole image or sentence):** It's Multivariate or Structured.
+
+---
+
+This section of the catch-up lecture (Slides 40–51) covers **Model Fitting**, focusing on the mathematical intuition behind **Gradient Descent**. This corresponds directly to **Chapter 6** of the reference book, *"Understanding Deep Learning"*.
+
+---
+
+### **1. The Goal of Training (Slide 40)**
+**Title:** Training
+**Concept:** Finding the "best" parameters.
+*   **Formula:** $\hat{\phi} = \text{argmin}_\phi [L[\phi]]$.
+*   **Notation:** 
+    *   $\phi$ (phi) represents the model parameters (weights and biases).
+    *   $L[\phi]$ is the scalar loss value.
+    *   $\text{argmin}$ is the operation that finds the value of the argument ($\phi$) that results in the **minimum** value of the function ($L$).
+*   **Book Connection:** This is defined in **Section 6.1 (p. 91)**. Training is framed as an optimization problem where we navigate the "loss landscape" to find the lowest point.
+
+---
+
+### **2. Visualizing the Loss Landscape (Slides 41–45)**
+**Title:** Example: 1D Linear regression training
+**Concept:** This visual sequence demonstrates how the algorithm actually "searches" for parameters.
+*   **Left Panel (The Landscape):** A 3D surface and a 2D contour map (heatmap). The horizontal axes are the parameters ($\phi_0$ for intercept, $\phi_1$ for slope). The vertical axis (or color intensity) is the loss.
+*   **Right Panel (The Fit):** Shows the data points and the line defined by the current parameters.
+*   **The Process:** 
+    *   **Step 0:** The algorithm starts at a random location (white dot). The line on the right fits the data poorly.
+    *   **Step 1–4:** The algorithm moves "downhill" across the contours toward the dark center (the minimum). Simultaneously, you can see the line on the right rotating and shifting to minimize the distance to the orange data points.
+*   **Book Connection:** This follows **Figure 6.1 (p. 93)**. The book notes that at the minimum, the surface is flat and the gradient is zero.
+
+---
+
+### **3. The Derivative as a Compass (Slides 46–47)**
+**Concept:** How do we know which way is "downhill"? We use the derivative.
+*   **Example:** A simple 1D function $y = x^2 - 4x + 5$.
+*   **Derivative:** $\frac{\partial y}{\partial x} = 2x - 4$.
+*   **The Minimum (Slide 47):** When $x=2$, the derivative is 0 ($2(2)-4=0$). This is the bottom of the curve.
+*   **Book Connection:** **Section 6.1 (p. 92)** explains that the derivative (or gradient in multiple dimensions) tells us the direction of the steepest **uphill** slope.
+
+---
+
+### **4. The Gradient Descent Update Rule (Slides 48–51)**
+**Concept:** Moving against the gradient.
+*   **Positive Slope (Slides 48–49):** 
+    *   At $x=3$, the slope is $+2$. At $x=4$, the slope is $+4$. 
+    *   The blue arrows point **left** (the negative direction).
+    *   *Logic:* If the slope is positive, we are to the right of the minimum. We must subtract from $x$ to go down.
+*   **Negative Slope (Slides 50–51):**
+    *   At $x=1$, the slope is $-2$. At $x=-1$, the slope is $-6$.
+    *   The blue arrows point **right** (the positive direction).
+    *   *Logic:* If the slope is negative, we are to the left of the minimum. We must add to $x$ to go down.
+*   **The Master Equation:** $\phi \leftarrow \phi - \alpha \frac{\partial L}{\partial \phi}$.
+    *   **The Minus Sign:** This is why we subtract the gradient. Subtracting a positive slope moves us left; subtracting a negative slope (adding) moves us right.
+    *   **$\alpha$ (alpha):** The **Learning Rate**. This determines how big of a step we take. 
+*   **Book Connection:** This is **Equation 6.3 (p. 92)**. The book emphasizes that $\alpha$ must be chosen carefully: too small and training is slow; too large and the algorithm can overshoot the minimum and become unstable (**Figure 6.9, p. 103**).
+
+---
+
+### **Why this matters for your Exam:**
+1.  **Iterative Nature:** Be prepared to explain why we can't just find the best parameters in one step for complex models (non-convexity, millions of parameters).
+2.  **Derivative Logic:** You may be asked to explain the role of the minus sign in the update rule. The answer is: "The gradient points uphill, so we subtract it to move downhill."
+3.  **Visualization:** Understand that the "Global Minimum" is the point in parameter space where the model's predictions best match the training data according to the loss function.
+
+---
+---
+---
+---
+---
+
+This section of the lecture (Slides 1–29) defines the probabilistic core of machine learning: **The Maximum Likelihood approach to Loss Functions**. 
+
+This material corresponds to **Chapter 5** of Prof. Simon Prince’s book, *"Understanding Deep Learning" (UDL)*.
+
+---
+
+### **1. Mathematical Prerequisites (Slide 2)**
+**Title:** Log and exp functions
 **Concepts:**
-*   **Notation:** The slides reinforce the distinction between **Variables** ($x, y$) and **Parameters** ($\phi$). 
-    *   Variables are your data points (the age of the car, the price). 
-    *   Parameters are the "dials" you turn to change how the model behaves.
-*   **Book Connection:** As stated in **Appendix A (p. 451)**, we use Roman letters for variables and Greek letters for parameters. 
-*   **The Model:** $y = f[x, \phi]$. The loss function $L[\phi]$ is a function of the *parameters*, not the data. We treat the data as fixed constants during training.
+*   **The Monotonic Property:** As shown in **UDL Section 5.1.3 (p. 73)**, the logarithm is a "monotonic" function. This means that if $a > b$, then $\log(a) > \log(b)$. 
+*   **Significance:** Because of this, the parameters $\phi$ that maximize a probability will also maximize the *logarithm* of that probability.
+*   **Notation:** $\log(\exp(z)) = z$. This identity is used to "undo" the exponential functions we often add to the end of networks to ensure positive outputs.
+*   **Product Rule:** $\log(a \cdot b) = \log(a) + \log(b)$. This is the most critical trick in deep learning; it allows us to turn a product of many small probabilities into a sum of terms, preventing computers from crashing due to "numerical underflow."
 
 ---
 
-### **2. Least Squares Regression Recap (Slides 33–40)**
-**Concepts:**
-*   **The Visual (Slide 33):** The orange dots are training data. The cyan line is the model's current guess. The vertical dashed lines are the **residuals** (errors).
-*   **Formula (Slide 32):** $L[\phi] = \sum (f[x_i, \phi] - y_i)^2$. 
-*   **Book Connection:** This is the **Least Squares loss** detailed in **Section 2.2.2 (p. 33)**.
-*   **The Loss Surface (Slides 35–40):** 
-    *   Panel (a) shows the **Loss Landscape**. Each contour line represents a level of "badness." The center (darkest part) is the **Global Minimum**.
-    *   The dots numbered **0, 1, 2, 3, 4** show the progression of the learning algorithm. As the dot moves to the center of the "bowl" on the left, the line on the right rotates and shifts to fit the data points better.
+### **2. The Taxonomy of Supervised Tasks (Slides 3–6)**
+**Concept:** Before picking a loss function, you must identify your task.
+*   **Slide 3:** Univariate Regression (predicting one continuous value, e.g., price).
+*   **Slide 4:** Graph Regression (predicting properties of molecules).
+*   **Slide 5:** Binary Classification (predicting one of two classes).
+*   **Slide 6:** Multiclass Classification (predicting one of $K$ classes).
+*   **Book Connection:** These task definitions are detailed in **UDL Section 1.1.1 (p. 16)**.
 
 ---
 
-### **3. The Geometry of Convexity (Slides 41–43)**
-**Concepts:**
-*   **Convex vs. Non-Convex:** 
-    *   **Convex (Slide 41b):** A smooth bowl with only one bottom. Gradient descent is guaranteed to find the best solution.
-    *   **Non-Convex (Slide 41a, c):** Multiple "valleys" (local minima). The algorithm might get stuck in a sub-optimal spot (Points 1 or 3).
-*   **Mathematical Test (Slide 42–43):**
-    *   In 1D: A function is convex if the **second derivative** is positive everywhere.
-    *   In higher dimensions: It is convex if the **Hessian matrix** ($H[\phi]$) is **positive definite** (all eigenvalues are positive).
-*   **Book Connection:** Explained in the **Notes for Chapter 6 (p. 106)**. Most deep learning models are non-convex, which is why initialization matters.
+### **3. The "Recipe" for Loss Functions (Slides 8–9)**
+**Title:** Recipe for loss functions
+**The Framework:** This 4-step process is the "engine" for creating models. It is described in **UDL Section 5.2 (p. 74)**.
+1.  **Step 1:** Choose a distribution that fits your data type.
+2.  **Slide 9 (Table):** This is a direct copy of **UDL Figure 5.11 (p. 84)**. It is a cheat sheet for the exam:
+    *   If the data is **unbounded continuous**, use **Normal (Gaussian)**.
+    *   If the data is **counts ($0, 1, 2 \dots$)**, use **Poisson**.
+    *   If the data is **circular (angles)**, use **Von Mises**.
 
 ---
 
-### **4. Intuition for Gradient Descent (Slides 45–51)**
-**Title:** This technique is known as gradient descent.
-**The Logic (Slide 46):** 
-*   Consider a simple parabola: $y = x^2 - 4x + 5$.
-*   The derivative is $\frac{\partial y}{\partial x} = 2x - 4$.
-*   **The "Slope" Rule:** 
-    *   At $x=4$ (Slide 49), the slope is $+4$. To get to the bottom (the minimum), we must move in the **negative** direction (left).
-    *   At $x=1$ (Slide 50), the slope is $-2$. To get to the bottom, we must move in the **positive** direction (right).
-*   **The Update Rule:** $\phi \leftarrow \phi - \alpha \frac{\partial L}{\partial \phi}$.
-    *   The **minus sign** is crucial. It ensures that if the slope is positive, we subtract (move left), and if the slope is negative, we add (move right). 
-    *   $\alpha$ (alpha) is the **learning rate** or step size.
-
-**Book Connection:** This is the derivation of the update rule in **Section 6.1 (p. 92, Eq 6.3)**.
+### **4. Case Study: Poisson Regression (Slides 7, 10–21)**
+**Concept:** Modeling count data (e.g., number of moose seen at different times).
+*   **The Distribution (Slide 10):** $Pr(y=k) = \frac{\lambda^k e^{-\lambda}}{k!}$. $\lambda$ (lambda) is the parameter the network must predict.
+*   **The Constraint (Slides 11–13):** $\lambda$ must be positive. Since a neural network $f[x, \phi]$ can output any number, we apply an **exponential function**: $\lambda = \exp[f[x, \phi]]$.
+*   **Conditional Probability (Slides 14–16):** These slides illustrate **UDL Section 5.1.1 (p. 72)**. For every time of day ($x$), the model predicts a specific "vertical" Poisson distribution over moose counts ($y$).
+*   **The Training Goal (Slides 17–20):** We want to maximize the Likelihood, which we implement by **minimizing the Negative Log-Likelihood (NLL)**. 
+    *   **Derivation:** Slide 19 shows the math of applying $\log$ to the Poisson formula. 
+    *   **Final Loss (Slide 20):** $L[\phi] = -\sum (y_i f[x_i, \phi] - \exp[f[x_i, \phi]])$. 
+*   **Inference (Slide 21):** To get a final answer, we pick the "peak" of the predicted distribution (**UDL Section 5.1.5, p. 74**).
 
 ---
 
-### **Summary Table for Course/Exam Prep**
-
-| Topic | Key Term | Mathematical Tool | Exam Importance |
-| :--- | :--- | :--- | :--- |
-| **Model** | Parameters ($\phi$) | $y = f[x, \phi]$ | Parameters are what we learn. |
-| **Loss** | Least Squares | $\sum (\text{pred} - \text{truth})^2$ | Used for Normal distributions. |
-| **Surface** | Convexity | Hessian Matrix | Determinant must be $> 0$. |
-| **Fitting** | Gradient Descent | $\phi - \alpha \frac{\partial L}{\partial \phi}$ | Why do we subtract? To move downhill. |
-
-### **Exam Advice:**
-1.  **Hessian:** Be ready to define convexity using the Hessian matrix for a multivariate function.
-2.  **Gradient Direction:** If a question asks why there is a minus sign in the SGD update rule, the answer is: "Because the gradient points in the direction of steepest *ascent*, so we must move in the *opposite* direction to reach the minimum."
-3.  **Local Minima:** Remember that for non-convex models (like deep networks), gradient descent only guarantees finding a **local** minimum, not the **global** minimum.
+### **5. Case Study: Circular Data / Von Mises (Slides 22–28)**
+**Concept:** Modeling data that "wraps around" (e.g., wind direction).
+*   **The Problem:** On a compass, $359^\circ$ and $1^\circ$ are very close, but a standard linear model thinks they are far apart.
+*   **The Distribution (Slide 26):** We use the **Von Mises distribution**.
+    *   **Formula:** $Pr(y|\mu, \kappa) = \frac{\exp[\kappa \cos(y - \mu)]}{2\pi \cdot I_0(\kappa)}$.
+    *   **$\mu$ (mu):** The mean direction (predicted by the network).
+    *   **$\kappa$ (kappa):** The "concentration" (how peaked the distribution is).
+*   **Book Connection:** This is discussed in **UDL Section 5.5.1 (p. 83)** and **Figure 5.13 (p. 88)**.
+*   **Visual (Slide 28):** Shows the distribution "wrapped" around the $y$-axis ($-\pi$ to $\pi$).
 
 ---
+
+### **6. Summary of Training (Slide 29)**
+**Title:** To train the model...
+**Concept:** Reinforces **UDL Equation 5.7 (p. 74)**.
+*   We use the **Negative Log-Likelihood** because it turns the multiplication of many probabilities into a simple sum of logs. 
+*   **$\hat{\phi} = \text{argmin}_\phi [L[\phi]]$:** This notation means "find the parameters $\phi$ that make the total loss as small as possible."
+
+---
+
+### **Exam Preparation Tips for this Section:**
+1.  **Why Log?** Be ready to explain that the log function is monotonic and turns products into sums for numerical stability (**p. 73**).
+2.  **Pick the Distribution:** You must be able to look at a dataset and select the right distribution from the table on Slide 9 (**p. 84**).
+3.  **Positivity:** If a distribution parameter must be positive (like $\lambda$ for Poisson or $\sigma$ for Gaussian), remember the "hack" is to use the exponential function on the network output (**p. 78**).
+
+---
+
+This section of the lecture (Slides 30–34) defines the transition from a general understanding of "loss" to the specific mathematical framework used to train neural networks. This bridges **Chapter 2** (the supervised learning framework) and **Chapter 5** (probabilistic loss functions) of the reference book.
+
+---
+
+### **Slide 30: The General Definition of Loss**
+**Title:** Loss function
+**Concept:** This slide formally defines how we quantify a model's performance using a training dataset.
+*   **The Dataset:** $\{ \mathbf{x}_i, \mathbf{y}_i \}_{i=1}^I$ represents $I$ pairs of inputs and ground-truth outputs.
+*   **Notation:** $L[\phi]$ is the **Cost Function** (or loss function). The book notes in **Section 2.2 (p. 32)** that while "loss" often refers to the error on a single data point, $L[\phi]$ is the **scalar** summary of the error across the *entire* dataset.
+*   **Logic:** A smaller scalar value means the model's parameters $\phi$ are doing a better job of mapping inputs to the correct outputs.
+
+---
+
+### **Slide 31: The Objective of Training**
+**Title:** Training
+**Concept:** This slide defines the "goal" of the machine learning algorithm.
+*   **The Operator:** $\hat{\phi} = \text{argmin}_\phi [L[\phi]]$.
+*   **Explanation:** As explained in **UDL Section 2.2 (p. 32, Eq 2.3)**, this formula means "Find the specific values for the parameters ($\hat{\phi}$) that result in the minimum possible value for the loss function $L$." 
+*   **Context:** This is the mathematical way of saying "learn the best settings for the network's dials."
+
+---
+
+### **Slide 32: The Least Squares Example**
+**Title:** Example: 1D Linear regression loss function
+**Concept:** This introduces the most common loss function for regression.
+*   **Formula:** $L[\phi] = \sum_{i=1}^I (f[x_i, \phi] - y_i)^2$.
+*   **Book Connection:** This is the **Least Squares Loss** detailed in **UDL Section 2.2.2 (p. 33)**. 
+*   **Intuition:** We calculate the difference between the model's prediction $f[x_i, \phi]$ and the truth $y_i$. We **square** this difference for two reasons:
+    1.  It ensures the result is always positive (so errors don't cancel each other out).
+    2.  It heavily penalizes large outliers (errors of 2 become 4, while errors of 10 become 100).
+
+---
+
+### **Slide 33: Visualizing the "Fit"**
+**Title:** Example: 1D Linear regression training
+**Concept:** This visualizes the optimization process.
+*   **The Landscape (Panel a):** This is a 3D **Loss Surface**. The two horizontal axes are the model's parameters ($\phi_0, \phi_1$). The "bowl" shape represents the loss value.
+*   **The Iterations (Points 0-4):** This shows **Gradient Descent** in action. We start at a random point (0) and take iterative steps "downhill" toward the global minimum.
+*   **The Line (Panel b):** Shows the physical line in $x/y$ space. As the point on the left moves to the bottom of the bowl, the line on the right moves to perfectly overlap the data.
+*   **Book Connection:** This follows **UDL Figure 2.4 (p. 37)**.
+
+---
+
+### **Slide 34: Roadmap for Chapter 5**
+**Title:** Loss functions
+**Concept:** This slide provides an agenda for the rest of the chapter, moving from "Least Squares" to a more general theory.
+*   **Maximum Likelihood:** The overarching principle that explains *why* we use certain loss functions.
+*   **The Recipe:** The 4-step framework used to derive these functions (**Section 5.2, p. 74**).
+*   **Cross Entropy:** The loss function used for classification tasks (**Section 5.7, p. 85**).
+
+---
+
+### **Summary for Course/Exam Prep:**
+You should understand that while **Least Squares** is a "standard" way to measure error, it is actually just one specific instance of a more general concept called **Maximum Likelihood**. In the slides following this section, Prof. Prince explains that if we assume our data has "Normal" noise, the math of Maximum Likelihood *leads* us directly to the Least Squares formula.
+
+---
+
+This section of the lecture (Slides 34–44) covers the core theoretical shift from simple curve-fitting to the **Probabilistic Framework** of Deep Learning. It explains why we use specific loss functions like "Least Squares" or "Cross Entropy" by deriving them from the **Maximum Likelihood** principle.
+
+This matches **Section 5.1 (pp. 70–74)** of the reference book, *"Understanding Deep Learning."*
+
+---
+
+### **1. The Shift to Probabilistic Prediction (Slides 34–37)**
+*   **Slide 34:** Sets the agenda. The lecture moves from "Recipe for loss functions" to specific examples.
+*   **The Paradigm Shift (Slides 35–37):** 
+    *   In earlier chapters, we thought of the model as predicting the value $y$ directly from $x$. 
+    *   **New Perspective:** We now view the model as computing a **conditional probability distribution** $Pr(\mathbf{y}|\mathbf{x})$. 
+    *   **Book Connection:** **Section 5.1 (p. 70)** explains that the loss function should encourage the model to assign a **high probability** to the true training outputs $y_i$ given their inputs $x_i$.
+
+---
+
+### **2. Predicting a Distribution (Slide 38)**
+**Concept:** How does a neural network predict a "distribution"?
+*   **Step 1:** We pick a standard distribution type (e.g., the **Normal Distribution** for continuous numbers).
+*   **Step 2:** We set the network to predict the **parameters** ($\theta$) of that distribution. 
+*   **Example:** For a Normal distribution, the parameters are $\theta = \{ \mu, \sigma^2 \}$. Usually, the network predicts the mean ($\mu$), and we assume the variance ($\sigma^2$) is constant.
+*   **Book Connection:** This is detailed in **Section 5.1.1 (p. 72)** and **Figure 5.3**.
+
+---
+
+### **3. Maximum Likelihood Criterion (Slide 39)**
+**Title:** Maximum likelihood criterion
+**The Formula:** $\hat{\phi} = \text{argmax}_\phi \left[ \prod_{i=1}^I Pr(y_i|f[x_i, \phi]) \right]$.
+*   **Notation:** 
+    *   $\prod$ (capital pi) represents the **product** of probabilities for all training points.
+    *   $f[x_i, \phi]$ is the network predicting the distribution parameters.
+*   **Logic:** We want to find the network weights ($\phi$) that make the actual observed data $\{x_i, y_i\}$ as likely as possible.
+*   **Book Connection:** This is **Section 5.1.2 (p. 72, Equation 5.1)**.
+
+---
+
+### **4. The "Log" Transformation (Slides 40–42)**
+**The Problem (Slide 40):** Probabilities are numbers between 0 and 1. When you multiply thousands of small numbers together (using $\prod$), the result becomes so tiny that computers cannot store it (this is called **numerical underflow**).
+
+**The Solution (Slides 41–42):**
+*   **Monotonicity:** The logarithm is a **monotonic function** (Slide 41). If $A > B$, then $\log(A) > \log(B)$.
+*   **Crucial Insight:** The point that maximizes a function is the *same* point that maximizes the logarithm of that function (**Section 5.1.3, p. 73**).
+*   **Formula (Slide 42):** Using the rule $\log(A \cdot B) = \log(A) + \log(B)$, we turn the product into a **sum of terms**:
+    $$\hat{\phi} = \text{argmax}_\phi \left[ \sum_{i=1}^I \log[Pr(y_i|f[x_i, \phi])] \right]$$
+*   Sums are numerically stable and much easier for computers to handle.
+
+---
+
+### **5. Negative Log-Likelihood (Slide 43)**
+**Title:** Minimizing negative log likelihood
+**Concept:** Converting "Maximization" to "Minimization."
+*   **Convention:** Optimization libraries (like PyTorch) are designed to **minimize** functions (find the bottom of the bowl). 
+*   **The Hack:** Maximizing a value is the same as **minimizing its negative**. 
+*   **Result:** This gives us the final **Negative Log-Likelihood (NLL)** loss function:
+    $$L[\phi] = -\sum_{i=1}^I \log[Pr(y_i|f[x_i, \phi])]$$
+*   **Book Connection:** This is the definition of the loss function $L[\phi]$ in **Section 5.1.4 (p. 74, Equation 5.4)**.
+
+---
+
+### **6. Inference (Slide 44)**
+**Title:** Inference
+**Concept:** Getting a single answer from a distribution.
+*   Once the model is trained, it doesn't give a number; it gives a distribution (a "cloud" of probabilities).
+*   **Point Estimate:** To get an actual prediction $\hat{y}$, we find the **peak** (the maximum) of that distribution.
+*   **Example:** For a Normal distribution, the peak is at the mean $\mu$. Since the network predicted $\mu$, the network's output *is* our best prediction.
+*   **Book Connection:** Defined in **Section 5.1.5 (p. 74, Equation 5.5)**.
+
+---
+
+### **Exam and Course Relevance:**
+1.  **Monotonicity Question:** Why do we use $\log$? Answer: Because it is monotonic (maximum stays in the same place) and turns products into sums for numerical stability.
+2.  **The NLL Formula:** Be prepared to write the general NLL formula (Equation 5.4).
+3.  **Inference Definition:** Understand that $\hat{y}$ (the prediction) is the $y$-value that maximizes the probability density predicted by the model.
+
+---
+
+This section of the lecture (Slides 45–49) presents the **formal 4-step recipe** for constructing and using loss functions. This framework allows a data scientist to move from a real-world problem to a trainable deep learning model.
+
+This material is a condensed version of **UDL Section 5.2 (p. 74)**.
+
+---
+
+### **Slide 45: Agenda Recap**
+*   **Title:** Loss functions
+*   **Context:** This slide acts as a roadmap, highlighting that we are now moving into the "Recipe" phase, which will then be applied to specific examples like regression and classification.
+
+---
+
+### **Slide 46: Step 1 – Choosing a Model for the Noise**
+*   **Text:** "Choose a suitable probability distribution $Pr(y|\theta)$..."
+*   **Full Aspect:** Before writing code, you must look at your data's **domain** (the range of possible values $y$ can take). 
+    *   If $y$ is any real number (house prices), use a **Normal distribution**.
+    *   If $y$ is binary (0 or 1), use a **Bernoulli distribution**.
+    *   If $y$ is a count ($0, 1, 2, \dots$), use a **Poisson distribution**.
+*   **Book Connection:** This is discussed in **Section 5.1.1 (p. 72, para 1)**. The choice of distribution is how you encode your "prior knowledge" about the nature of the data.
+
+---
+
+### **Slide 47: Step 2 – Connecting the Network to the Distribution**
+*   **Text:** "Set the machine learning model $f[\mathbf{x}, \phi]$ to predict one or more of these parameters..."
+*   **Notation Clarification:**
+    *   **$\phi$ (phi):** The weights and biases *inside* the neural network.
+    *   **$\theta$ (theta):** The parameters *of the distribution* (like the mean $\mu$ or variance $\sigma^2$).
+*   **Full Aspect:** The neural network is no longer just predicting $y$. It is now a **parameter estimator**. For example, in regression, the network's output is taken to be the mean ($\mu$) of a Normal distribution: $\mu = f[x, \phi]$.
+*   **Book Connection:** This follows **Section 5.1.1 (p. 72, para 2)**. The network defines how the *shape* of the distribution changes based on the input $x$.
+
+---
+
+### **Slide 48: Step 3 – Training (The Loss Function)**
+*   **Title:** To train the model...
+*   **Formula (Equation 5.7):** $\hat{\phi} = \text{argmin}_\phi \left[ -\sum_{i=1}^I \log[Pr(y_i|f[\mathbf{x}_i, \phi])] \right]$.
+*   **Full Aspect:** This is the **Negative Log-Likelihood (NLL)**. 
+    1.  **Likelihood:** We want to maximize the probability of the training data.
+    2.  **Log:** We take the logarithm to turn a product of tiny numbers into a sum for numerical stability.
+    3.  **Negative:** We negate it because optimization algorithms are built to **minimize** (find the bottom of a bowl).
+*   **Book Connection:** This derivation is the focus of **Sections 5.1.2 through 5.1.4 (pp. 72–74)**. Minimizing the NLL is the standard way to "fit" a probabilistic model.
+
+---
+
+### **Slide 49: Step 4 – Inference (Getting an Answer)**
+*   **Title:** To perform inference...
+*   **Text:** "...return either the full distribution... or the maximum of this distribution."
+*   **Full Aspect:** After training, when you give the model a new $x$, it outputs a distribution.
+    *   **Option 1 (Full distribution):** Useful for understanding **uncertainty** (e.g., "The model thinks the price is $\$300k$, but it might be between $\$250k$ and $\$350k$").
+    *   **Option 2 (Point estimate):** Often we just want a single answer. We take the **peak** (the maximum) of the predicted distribution.
+*   **Book Connection:** Defined in **Section 5.1.5 (p. 74, Equation 5.5)** as $\hat{y} = \text{argmax}_y [Pr(y|f[x, \hat{\phi}])]$.
+
+---
+
+### **Exam and Course Relevance:**
+Prof. Prince emphasizes this 4-step recipe because it is **universal**. Whether you are working with text, images, or medical data, the process remains the same:
+1.  Match data type to a distribution.
+2.  Map network output to distribution parameters.
+3.  Minimize the Negative Log-Likelihood.
+4.  Predict the peak of the distribution during testing. 
+
+In the subsequent slides, the lecture shows how **Step 3** for a Normal distribution mathematically results in the **Least Squares** formula.
+
+---
+
+Based on the content of the book **"Understanding Deep Learning"** (specifically Chapter 5), here is an explanation of pages 50 to 63 of the lecture slides:
+
+### **Overview (Pages 50–51)**
+These slides begin the first concrete example of the "Maximum Likelihood" recipe: **Univariate Regression**. The goal is to predict a single real-valued output (e.g., the price of a house) from an input.
+
+---
+
+### **Step 1: Choose a Distribution (Pages 52–53)**
+According to the book (Section 5.2), the first step in constructing a loss function is choosing a probability distribution over the output domain.
+*   For regression, the output $y$ is a real number. A sensible choice is the **Normal (Gaussian) distribution**.
+*   The slides show the formula for the Normal distribution, defined by two parameters: the mean ($\mu$), which is the location of the peak, and the variance ($\sigma^2$), which represents the width or uncertainty.
+
+---
+
+### **Step 2: Predict the Parameters (Page 54)**
+The next step is to use the machine learning model $f[x, \phi]$ to predict one of those distribution parameters.
+*   In this standard example, the model is set to predict the **mean** ($\mu$).
+*   So, $\mu = f[x, \phi]$. This means for every input $x$, the network outputs the center of a bell curve where it believes the true value most likely lies.
+
+---
+
+### **Step 3: Training via Negative Log-Likelihood (Pages 55–57)**
+To find the best parameters $\phi$, we maximize the likelihood of the training data.
+*   **Page 55:** Shows the joint probability of all data points. Because we assume the data are independent and identically distributed (i.i.d.), the total probability is the product of individual probabilities.
+*   **Page 56:** To make the math easier and more stable for computers, we take the **Negative Log-Likelihood (NLL)**. This turns the product into a sum of logs.
+*   **Page 57 (The Breakthrough):** The slides show the algebraic simplification of the NLL for a Normal distribution. After removing constants that don't affect the minimum, you are left with:
+    $$\sum (y_i - f[x_i, \phi])^2$$
+*   **Conclusion:** This proves that the **Least Squares** loss function used in Chapter 2 is not arbitrary—it is a direct mathematical consequence of assuming the model's errors follow a Normal distribution (Book Section 5.3.1).
+
+---
+
+### **Maximum Likelihood vs. Least Squares (Pages 58–59)**
+These slides provide a visual comparison:
+*   **Least Squares:** Focuses on minimizing the squared vertical distance (orange dashed lines) between the data points and the regression line.
+*   **Maximum Likelihood:** Focuses on shifting and "stretching" the Gaussian distributions so that the peaks (highest probability) align as closely as possible with the observed data points.
+
+---
+
+### **Step 4: Inference (Page 60)**
+Once the model is trained, we need a single "point estimate" prediction for new data.
+*   The model outputs a distribution, but the "best" prediction is the value where that distribution is maximized (the **MAP** estimate).
+*   For a Normal distribution, the maximum is exactly at the mean ($\mu$). Therefore, our prediction is simply $\hat{y} = f[x, \hat{\phi}]$.
+
+---
+
+### **Estimating Variance and Heteroscedasticity (Pages 61–63)**
+*   **Page 61:** Notes that while we usually treat variance ($\sigma^2$) as a constant, we *could* actually learn it as a parameter during training.
+*   **Page 62:** Introduces **Heteroscedastic Regression**. In standard (homoscedastic) regression, we assume the noise level is the same everywhere. In heteroscedastic regression, we assume the noise/uncertainty depends on the input $x$.
+*   **Page 63 (Architectures):**
+    *   **Panel (a) & (b):** Show a standard network where only $\mu$ is output. The uncertainty (gray region) is constant.
+    *   **Panel (c) & (d):** Show a network with **two outputs**. One branch predicts the mean ($\mu$) and the other predicts the variance ($\sigma^2$). This allows the model to say "I am confident about this prediction" in some areas of the input space and "I am very uncertain" in others (Book Section 5.3.4).
+
+---
+
+Based on the data from the book **"Understanding Deep Learning"** (Section 5.4), here is an explanation of pages 64 to 72 of the slides, which cover **Binary Classification**:
+
+### **The Problem (Pages 64–65)**
+In binary classification, the goal is to assign an input $x$ to one of two discrete classes, $y \in \{0, 1\}$. 
+*   **Example:** A restaurant review is the input; the model must predict if it is "Positive" ($y=1$) or "Negative" ($y=0$).
+*   The model takes a vector of numbers (the encoded review) and outputs a probability for each class.
+
+---
+
+### **Step 1: Choose a Distribution (Page 66)**
+Since the output $y$ can only be 0 or 1, we use the **Bernoulli distribution**. 
+*   This distribution has a single parameter, $\lambda$ (lambda), which represents the probability that $y=1$.
+*   The probability that $y=0$ is simply $1 - \lambda$.
+*   The slides show the mathematical "trick" to write the probability density in one line: $Pr(y|\lambda) = (1 - \lambda)^{1-y} \cdot \lambda^y$. If $y=1$, the first term becomes 1; if $y=0$, the second term becomes 1.
+
+---
+
+### **Step 2: Predict the Parameter (Pages 67–68)**
+We want the neural network to predict $\lambda$. However, there is a problem:
+*   **The Problem:** A neural network can output any real number ($-\infty$ to $+\infty$), but the probability $\lambda$ must be between 0 and 1.
+*   **The Solution:** We pass the network's raw output through the **logistic sigmoid function** ($sig[z]$). 
+*   As shown on **Page 68**, the sigmoid function "squashes" any input into a value between 0 and 1. This ensures the model always predicts a valid probability.
+
+---
+
+### **The Resulting Likelihood (Pages 69–70)**
+*   **Page 69:** By combining the Bernoulli distribution with the sigmoid-transformed model output, we get the likelihood for a single data point.
+*   **Page 70:** Provides a visual intuition. 
+    *   **Panel (a)** shows the raw network output $f[x, \phi]$ (which is piecewise linear).
+    *   **Panel (b)** shows the same function after the sigmoid: $sig[f[x, \phi]]$. This curve represents the probability of the "positive" class across the input space.
+    *   **Panel (c)** shows the resulting Bernoulli distributions at specific points of $x$.
+
+---
+
+### **Step 3: The Loss Function (Page 71)**
+To train the model, we use the Maximum Likelihood recipe: take the Negative Log-Likelihood (NLL) of the Bernoulli distribution.
+*   The resulting formula is:
+    $$L[\phi] = \sum_{i=1}^I -(1 - y_i) \log[1 - sig[f[x_i, \phi]]] - y_i \log[sig[f[x_i, \phi]]]$$
+*   This is famously known as the **Binary Cross-Entropy loss**.
+*   The book explains that this loss favors parameters that produce a high $\lambda$ when the true label $y=1$, and a low $\lambda$ when $y=0$.
+
+---
+
+### **Step 4: Inference (Page 72)**
+Once the model is trained, how do we make a final decision?
+*   The model gives us a probability $\lambda = sig[f[x, \phi]]$.
+*   Standard practice is to **choose the class with the largest probability**.
+*   If $\lambda > 0.5$, we predict $y=1$ (Positive).
+*   If $\lambda < 0.5$, we predict $y=0$ (Negative).
+
+---
+
+Based on Chapter 5.5 of the book **"Understanding Deep Learning,"** here is the explanation for pages 73 to 79 of the slides, which cover **Multiclass Classification**:
+
+### **The Goal (Pages 73–74)**
+The goal of multiclass classification is to assign an input $x$ to one of $K > 2$ categories.
+*   **Example:** Identifying which of 10 digits (0–9) is present in an image of a handwritten number.
+*   The model must now output a vector of $K$ probabilities, one for each possible class.
+
+---
+
+### **Step 1: Choose a Distribution (Page 75)**
+For multiclass problems, the appropriate distribution is the **Categorical distribution**.
+*   It is defined by $K$ parameters ($\lambda_1, \lambda_2, ..., \lambda_K$), where $\lambda_k$ represents the probability that the input belongs to class $k$.
+*   **Constraints:** To be a valid probability distribution, each $\lambda_k$ must be between 0 and 1, and the sum of all $\lambda$ values must exactly equal 1.
+
+---
+
+### **Step 2: Predict the Parameters via Softmax (Page 76)**
+Similar to the binary case, a neural network's raw outputs (called **logits**) can be any real number. We need a way to force these $K$ outputs to satisfy the probability constraints.
+*   **The Solution:** The **Softmax function**.
+*   The softmax function takes a vector of $K$ arbitrary numbers and transforms them:
+    1.  It exponentiates each value ($e^{z_k}$), which ensures every term is **positive**.
+    2.  It divides each by the sum of all exponentiated terms, which ensures the final values **sum to one**.
+*   The likelihood that the input has label $y=k$ is defined as $Pr(y=k|x) = \text{softmax}_k[f[x, \phi]]$.
+
+---
+
+### **Visualizing Multiclass Outputs (Page 77)**
+This slide illustrates the effect of the softmax function:
+*   **Panel (a):** Shows three raw network outputs ($f_1, f_2, f_3$). These are piecewise linear and can be negative or very large.
+*   **Panel (b):** Shows the outputs after the softmax transformation ($\lambda_1, \lambda_2, \lambda_3$). 
+*   Notice how the softmax makes the curves "compete": at any vertical slice (for any input $x$), the three values now stay between 0 and 1 and always sum to 1.
+
+---
+
+### **Step 3: The Loss Function (Page 78)**
+To train the model, we apply the Negative Log-Likelihood (NLL) to the categorical distribution.
+*   This results in the **Multiclass Cross-Entropy loss**.
+*   Mathematically, for a correct label $y_i$, the loss is simply the negative log of the probability that the model assigned to that specific correct class: $-\log[\text{softmax}_{y_i}[f[x_i, \phi]]]$.
+*   The loss is minimized when the model assigns a probability of 1.0 to the correct class.
+
+---
+
+### **Step 4: Inference (Page 79)**
+After training, the model provides a probability distribution over the $K$ classes. 
+*   To make a final prediction ($\hat{y}$), we **choose the class with the largest probability**.
+*   Visually, this corresponds to finding which of the color-coded curves is highest at a given point $x$ on the graph. This is the **Argmax** operation.
+
+---
+
+Page 81 of the slides (which corresponds to **Figure 5.11** in the book) is a comprehensive reference table. It explains that the **"Maximum Likelihood Recipe"** can be applied to almost any type of data, not just standard regression or classification.
+
+The core idea is: **If you know the constraints of your output ($y$), you can choose a specific probability distribution that fits those constraints and derive a custom loss function.**
+
+Here is a detailed breakdown of the table by category:
+
+---
+
+### **1. Continuous Unbounded Data ($y \in \mathbb{R}$)**
+*   **Univariate Normal:** The standard regression we've studied. Used when you expect errors to be "well-behaved" and symmetric around a single mean.
+*   **Laplace or t-distribution (Robust Regression):** Standard Normal distributions are very sensitive to outliers. If your data has extreme "noisy" values, the Laplace distribution has "heavier tails." This results in a loss function that uses absolute differences rather than squared differences, making the model more robust.
+*   **Mixture of Gaussians (Multimodal Regression):** Used when a single input $x$ could result in several different valid answers. For example, if a road forks, a car could go left OR right. A single Gaussian would predict the average (hitting the wall in the middle); a mixture of Gaussians predicts two peaks (one for each path).
+
+### **2. Continuous Bounded Data**
+*   **Exponential or Gamma ($y \in \mathbb{R}^+$):** Used when the output **must be positive** (e.g., predicting the duration of a phone call or the distance to an object). You cannot have a negative distance, so these distributions are mathematically appropriate.
+*   **Beta ($y \in [0, 1]$):** Used for predicting **proportions or percentages**. If your target is "what fraction of this image is covered by clouds," the value must be between 0 and 1.
+
+### **3. Discrete Data (Counting and Categories)**
+*   **Bernoulli ($y \in \{0, 1\}$):** The foundation for **Binary Classification** (e.g., Spam vs. Not Spam).
+*   **Categorical ($y \in \{1, \dots, K\}$):** The foundation for **Multiclass Classification** (e.g., identifying different species of animals).
+*   **Poisson ($y \in \{0, 1, 2, \dots\}$):** Used for **Event Counts**. If you are predicting the number of pedestrians crossing a street per minute, the output must be a non-negative integer.
+
+### **4. Special Data Types**
+*   **Multivariate Normal ($y \in \mathbb{R}^K$):** Used for predicting multiple related real numbers simultaneously, such as the $(x, y)$ coordinates of all joints in a human body.
+*   **Wishart:** A more advanced distribution used to predict **Symmetric Positive Definite matrices**, typically used when the model needs to output a covariance matrix (predicting its own uncertainty).
+*   **von Mises ($y \in (-\pi, \pi]$):** Used for **Directional/Circular data**. Standard regression fails here because $-\pi$ and $+\pi$ are the same physical direction. The von Mises distribution "wraps" around a circle to handle this correctly.
+*   **Plackett-Luce:** Used for **Ranking**. If the goal is to take a set of items and output them in order from "most liked" to "least liked," this distribution models the probability of different permutations.
+
+---
+
+### **Why is this table important?**
+As the book states in Section 5.5.1, the takeaway is that **Deep Learning is flexible.** You are not limited to "Mean Squared Error" or "Cross-Entropy." By looking at this table, a researcher can identify the physical nature of their output data and select the mathematically "correct" loss function to train their model.
+
+---
+
+Based on the content of the book **"Understanding Deep Learning"** (Section 5.6), here is the explanation for pages 83 to 86 of the slides, which discuss models with **Multiple Outputs**:
+
+### **Slide 83: The Independence Assumption**
+In many real-world tasks, we want to predict a vector of values rather than just one (e.g., predicting the coordinates of multiple joints in a human pose). 
+*   **The Assumption:** To make this mathematically simple, we usually assume that the errors in each output are **independent**. 
+*   **The Math:** Because of the independence rule, the total probability of the whole output vector $\mathbf{y}$ is the **product** of the individual probabilities for each dimension $d$:
+    $$Pr(\mathbf{y}|\mathbf{x}) = \prod_d Pr(y_d | f_d[\mathbf{x}, \phi])$$
+*   **The Resulting Loss:** When we take the Negative Log-Likelihood (NLL), the logarithm turns the product into a **sum**. Therefore, the total loss is simply the sum of the individual losses for each output component.
+
+---
+
+### **Slide 84: Example 4 — Multivariate Regression**
+This slide provides a concrete application of the "Multiple Outputs" theory. 
+*   **The Task:** Predicting the physical properties of a chemical molecule.
+*   **The Inputs:** The chemical structure (represented as a vector).
+*   **The Outputs:** The model is predicting two different continuous values: the **freezing point** and the **boiling point**.
+*   This is a **multivariate regression** problem because we are predicting more than one real number simultaneously.
+
+---
+
+### **Slide 85: Multivariate Regression Math**
+This slide shows how to apply the "Maximum Likelihood Recipe" to the chemical example:
+1.  **Distribution:** We choose a Normal distribution for each dimension.
+2.  **Model:** The neural network is designed to have $D_o$ outputs (in this case, 2). Each output predicts the mean ($\mu_d$) for one of the properties.
+3.  **Likelihood:** The joint likelihood is the product of two Gaussians. 
+4.  **Training:** By minimizing the negative log-likelihood of this product, we effectively minimize two separate "Least Squares" terms at the same time.
+
+---
+
+### **Slide 86: Practical Challenges — Scaling and Magnitude**
+This slide addresses a critical engineering problem discussed in the book (Problem 5.9): **What if your outputs have different units or scales?**
+*   **The Problem:** Imagine a model predicting a person's **weight** in kilos (e.g., 80.0) and **height** in meters (e.g., 1.8). 
+    *   An error of 10% in weight is 8kg (squared error = 64). 
+    *   An error of 10% in height is 0.18m (squared error = 0.03).
+*   **The Danger:** The "Weight" part of the loss is much larger and will dominate the training. The model will focus entirely on getting the weight right and ignore the height.
+*   **Solutions:**
+    1.  **Learn separate variances:** Use a heteroscedastic model (from Page 62) to let the model learn that the "noise level" for weight is naturally larger than for height.
+    2.  **Rescale (Standardize):** Pre-process the data so that all targets have a mean of 0 and a variance of 1 before training. This is the most common solution in practice.
+
+---
+
+Based on Section 5.7 of the book **"Understanding Deep Learning,"** here is a detailed explanation of pages 88 to 92 of the slides. These slides provide the theoretical bridge between **Information Theory** (measuring distances between distributions) and **Machine Learning** (training models).
+
+---
+
+### **Slide 88: Kullback-Leibler (KL) Divergence**
+Until now, we have derived loss functions by asking: *"How do we make the data most probable?"* (Maximum Likelihood). Here, we shift to a different question: **"How do we make our model's distribution as close as possible to the data's distribution?"**
+
+*   **The Tool:** To measure the "distance" between two probability distributions $q(z)$ (the truth) and $p(z)$ (our model), we use **Kullback-Leibler (KL) Divergence**.
+*   **The Formula:** 
+    $$KL[q||p] = \int q(z) \log[q(z)] dz - \int q(z) \log[p(z)] dz$$
+*   **Intuition:** It calculates the average difference between the two distributions. If the distributions are identical, the KL divergence is zero. It is always non-negative.
+
+---
+
+### **Slide 89: The Empirical Data Distribution**
+To use KL divergence, we need a mathematical way to represent our training data as a "distribution" ($q(y)$).
+*   **The Problem:** We don't have a smooth curve for the "true" distribution; we only have $I$ specific data points ($y_1, y_2, \dots$).
+*   **The Solution:** We model the data as a set of **Dirac delta functions** (the arrows in the graph). Each data point is a "spike" of probability.
+*   **The Formula:** $q(y) = \frac{1}{I} \sum \delta[y - y_i]$. This says: "All the probability mass is concentrated exactly on our training examples."
+
+---
+
+### **Slide 90: Simplifying the Distance**
+We want to find parameters $\theta$ that minimize the KL divergence.
+*   **The Logic:** Look at the two parts of the KL formula from Slide 88.
+    1.  The first term ($\int q \log q$) depends only on the data. Since the data doesn't change when we move our model parameters, this term is a **constant**.
+    2.  The second term ($-\int q \log p$) is the part we can change. In Information Theory, this term is known as **Cross Entropy**.
+*   **The Goal:** Minimizing the distance (KL Divergence) is mathematically identical to minimizing the **Cross Entropy**.
+
+---
+
+### **Slide 91: The Link to Negative Log-Likelihood**
+This is the "Aha!" moment of the chapter.
+*   When we substitute the "spikes" (delta functions) from Slide 89 into the Cross Entropy integral, the integral collapses. 
+*   **The Result:** The integral becomes a simple sum over our actual data points:
+    $$\text{Loss} = -\frac{1}{I} \sum_{i=1}^I \log[Pr(y_i|\theta)]$$
+*   **Conclusion:** This is exactly the **Negative Log-Likelihood** formula we derived earlier in the chapter. This proves that **minimizing Cross Entropy is the same thing as Maximum Likelihood.**
+
+---
+
+### **Slide 92: Cross Entropy in Machine Learning**
+This slide summarizes the final workflow used in modern deep learning:
+1.  We have a model $f[\mathbf{x}_i, \phi]$ that predicts the parameters of a distribution.
+2.  We compute the Negative Log-Likelihood (which we now know is the same as Cross Entropy).
+3.  We minimize this sum to find the best parameters $\phi$.
+
+**Summary of the naming convention:**
+*   In **Regression**, we call it "Least Squares," but it's actually the Cross Entropy of a Normal distribution.
+*   In **Binary Classification**, we call it "Binary Cross-Entropy."
+*   In **Multiclass Classification**, we call it "Multiclass Cross-Entropy."
+
+**All of these are just different names for the same underlying principle: minimizing the KL divergence between the data and the model.**
+
+**Full Summary:**
+This organization of the lecture material reflects the progression from basic task identification to the high-level theoretical connection between information theory and deep learning.
+
+### **Part 1: Organized Content of the Lecture Slides**
+
+#### **I. Introduction to Supervised Tasks (Slides 1–6)**
+*   **Machine Learning Taxonomy:** Identifies the primary tasks based on output type: Univariate Regression (continuous), Graph/Multivariate Regression ($>1$ continuous output), Binary Classification (2 classes), and Multiclass Classification ($>2$ classes).
+*   **Architectural Context:** Links these tasks to specific network types: Fully connected (regression), Graph Neural Networks, Transformers (text), and Convolutional Networks (music/images).
+
+#### **II. Mathematical and Logic Foundations (Slides 2, 35–43)**
+*   **Log/Exp Properties:** Establishes the use of natural logs to handle products of small probabilities, converting them into manageable sums.
+*   **The Paradigm Shift:** Transitions from a "black box" model that outputs a number to a probabilistic model that outputs a **conditional probability distribution** $Pr(\mathbf{y}|\mathbf{x})$.
+*   **Numerical Stability:** Explains that maximizing the likelihood directly is computationally dangerous (numerical underflow), hence the shift to **Negative Log-Likelihood (NLL)**.
+
+#### **III. The "Maximum Likelihood" Recipe (Slides 8, 45–49)**
+A universal 4-step framework used to build any deep learning model:
+1.  **Select a Distribution:** Choose one that fits the physical domain of the data (e.g., Normal, Bernoulli, Poisson).
+2.  **Predict Parameters:** Use the neural network to output the parameters of that distribution (e.g., mean $\mu$ or probability $\lambda$).
+3.  **Define Loss:** Calculate the NLL of the training set.
+4.  **Inference:** During testing, predict the "peak" (maximum) of the predicted distribution.
+
+#### **IV. Application of the Recipe (Slides 50–79, 83–86)**
+*   **Regression:** Demonstrates that choosing a Normal distribution and minimizing NLL creates the **Least Squares** loss function.
+*   **Binary Classification:** Uses the Bernoulli distribution and the **Sigmoid** function to create **Binary Cross-Entropy**.
+*   **Multiclass Classification:** Uses the Categorical distribution and the **Softmax** function to create **Multiclass Cross-Entropy**.
+*   **Multiple Outputs:** Explains the assumption of independence, which allows the total loss for multiple targets to be computed as a simple sum of individual losses.
+
+#### **V. Theoretical Unification via KL Divergence (Slides 87–92)**
+*   **Kullback-Leibler (KL) Divergence:** Introduces a metric to measure the distance between the "true" data distribution (empirical) and the model's distribution.
+*   **Dirac Delta Functions:** Models training data as a set of infinite "spikes" of probability.
+*   **The Big Conclusion:** Mathematically proves that minimizing the distance between the data and the model (KL Divergence) is identical to minimizing Cross-Entropy, which is identical to Maximum Likelihood.
+
+---
+
+### **Part 2: Summary of Examples and Formulas**
+
+| Example / Concept | Governing Formula | One-Sentence Description |
+| :--- | :--- | :--- |
+| **Log/Exp Property** | $\log[a \cdot b] = \log[a] + \log[b]$ | Used to transform unstable probability products into numerically stable sums. |
+| **Normal (Regression)** | $L[\phi] = \sum_{i=1}^I (y_i - f[x_i, \phi])^2$ | Minimizing the NLL of a Normal distribution leads to the standard Least Squares loss. |
+| **Binary Classification** | $L[\phi] = \sum -(1 - y_i) \log[1 - sig] - y_i \log[sig]$ | Uses the sigmoid function to map outputs to a Bernoulli distribution parameter. |
+| **Multiclass Classification** | $L[\phi] = -\sum_{i=1}^I \log[softmax_{y_i}[f[x_i, \phi]]]$ | Uses the softmax function to ensure $K$ outputs represent a valid categorical distribution. |
+| **Heteroscedasticity** | $\sigma^2 = f_2[x, \phi]^2$ | A regression variation where the network predicts both the mean and the varying uncertainty. |
+| **Poisson (Counts)** | $Pr(y=k) = \frac{\lambda^k e^{-\lambda}}{k!}$ | The appropriate distribution for modeling discrete counts of events ($0, 1, 2 \dots$). |
+| **Multiple Outputs** | $L[\phi] = -\sum_i \sum_d \log[Pr(y_{id} \| f_d[x_i, \phi])]$ | Assumes output independence to justify summing individual losses for a vector of targets. |
+| **KL Divergence** | $KL[q \| p] = \text{Constant} - \text{Cross Entropy}$ | Proves that making the model match the data distribution is the same as minimizing NLL. |
+
+---
 ---
 ---
 ---
 ---
 
+---
+---
+---
+---
+---
 
-
----
----
----
----
----
 
 This analysis explains the lecture slides for **CM20315 – Machine Learning, Lecture 6: Fitting Models**, using the framework of the reference book, *"Understanding Deep Learning"* by Simon J.D. Prince.
 
